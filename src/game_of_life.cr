@@ -12,21 +12,8 @@ module GameOfLife
   end
 
   class Map
-    def initialize(x : Int32, y : Int32)
-      @array = Array(Array(Int32)).new(y) { |i| Array(Int32).new(x) { |i| Random.rand(2) } }
-      # @array = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      #           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      #           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      #           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      #           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      #           [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-      #           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      #           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      #           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      #           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      #           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      #           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      # ]
+    def initialize(array : Array(Array(Int32)))
+      @array = array
     end
 
     def get(x, y) : Int32
@@ -120,15 +107,20 @@ module GameOfLife
   end
 
   class Game
-    def initialize(x : Int32, y : Int32)
-      @map = Map.new(x, y)
+    def initialize(array : Array(Array(Int32)), one_frame : Bool=false)
+      @one_frame = one_frame
+      @map = Map.new(array)
     end
 
     def run
       while true
-        @map.next_map
         @map.show
+        @map.next_map
         sleep(0.1)
+
+        if @one_frame
+          gets
+        end
       end
     end
   end
