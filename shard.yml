@@ -1,12 +1,12 @@
-name: life_game
+name: game_of_life
 version: 0.1.0
 
 authors:
   - your-name-here <your-email-here>
 
 targets:
-  life_game:
-    main: src/life_game.cr
+  game_of_life:
+    main: src/game_of_life.cr
 
 crystal: 0.35.1
 

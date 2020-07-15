@@ -1,6 +1,6 @@
 require "./spec_helper"
 
-describe LifeGame do
+describe GameOfLife do
   # TODO: Write tests
 
   it "works" do

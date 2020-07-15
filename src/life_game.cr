@@ -1,7 +1,7 @@
-# TODO: Write documentation for `LifeGame`
+# TODO: Write documentation for `GameOfLife`
 require "random"
 
-module LifeGame
+module GameOfLife
   VERSION = "0.1.0"
   enum CellStatus
     BIRTH          # 誕生
