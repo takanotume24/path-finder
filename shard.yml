@@ -1,12 +1,12 @@
-name: game_of_life
+name: forest_fire
 version: 0.1.0
 
 authors:
-  - your-name-here <your-email-here>
+  - takanotume24 <takanotume24@gmail.com>
 
 targets:
-  game_of_life:
-    main: src/game_of_life.cr
+  forest_fire:
+    main: src/forest_fire.cr
 
 crystal: 0.35.1
 
