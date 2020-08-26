@@ -1,12 +1,12 @@
-name: forest_fire
+name: path_finder
 version: 0.1.0
 
 authors:
   - takanotume24 <takanotume24@gmail.com>
 
 targets:
-  forest_fire:
-    main: src/forest_fire.cr
+  path_finder:
+    main: src/path_finder.cr
 
 crystal: 0.35.1
 
