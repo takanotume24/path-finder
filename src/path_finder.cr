@@ -1,6 +1,7 @@
 # TODO: Write documentation for `PathFinder`
 require "random"
 require "csv"
+require "colorize"
 
 module PathFinder
   VERSION = "0.1.0"
@@ -18,6 +19,10 @@ module PathFinder
 
     def add_except(original : Cell)
       return (original.step + self.cost)
+    end
+
+    def to_color
+      return "⬜".colorize(Colorize::Color256.new(self.step.to_u8))
     end
 
     def_clone
@@ -48,8 +53,16 @@ module PathFinder
   end
 
   class Map
-    def initialize(@array : Array(Array(Cell)), @start : Point, @goal : Point, @processing_cost : Int32 = 0, @queue = Deque(Point).new)
+    def initialize(
+      @array : Array(Array(Cell)),
+      @start : Point,
+      @goal : Point,
+      @processing_cost : Int32 = 0,
+      @queue = Deque(Point).new,
+      @route = Deque(Point).new
+    )
       @queue << @start
+      @route << @goal
     end
 
     def update
@@ -63,18 +76,24 @@ module PathFinder
           break
         end
 
-        add_cost_around_cells point, @array
+        add_costs_around_cell point, @array
         show
       end
 
       # @array = array
     end
 
-    def add_cost_around_cells(origin : Point, array = @array)
+    def add_costs_around_cell(origin : Point, array = @array)
       add_cost origin.upper, origin, array
       add_cost origin.bottom, origin, array
       add_cost origin.left, origin, array
       add_cost origin.right, origin, array
+    end
+
+    def get_min_step_cell_around_cell(origin : Point)
+      [get(origin.upper), get(origin.bottom), get(origin.right), get(origin.left)].min_by do |cell|
+        cell.step
+      end
     end
 
     def add_cost(target : Point, origin : Point, array = @array)
@@ -100,8 +119,8 @@ module PathFinder
     def get(point : Point, array = @array) : Cell?
       x = point.x
       y = point.y
-      x_max = array[0].size
-      y_max = array.size
+      x_max = array.size
+      y_max = array[0].size
 
       if x < 0 || x_max <= x
         return nil
@@ -133,6 +152,14 @@ module PathFinder
         print "\n"
       end
       puts ""
+    end
+
+    def show_route
+      while @route.size != 0
+        now = @route.pop
+        now.
+        @route << get_min_step_cell_around_cell array[@goal.x][@goal.y]
+      end
     end
   end
 
