@@ -4,23 +4,16 @@ require "csv"
 
 module ForestFire
   VERSION = "0.1.0"
-  enum CellStatus
-    VACANT
-    TREE
-    READY
-    FIRE
-    ASH
-  end
 
   class Cell
-    getter cost, updated
-    setter cost, updated
+    getter cost, step, updated
+    setter cost, step, updated
 
-    def initialize(@cost : Int32, @updated : Bool = false)
+    def initialize(@cost : Int32, @step = 0, @updated : Bool = false)
     end
 
     def add
-      self.cost += 1
+      self.step += 1
     end
 
     def_clone
@@ -59,34 +52,35 @@ module ForestFire
       array = @array.clone
 
       point = 1
-      while point
+      while @queue.size != 0
         pp @queue
         point = @queue.shift?
         if point.nil?
           break
         end
 
-        add_cost_around_cells point, array
-      end
-      
-      @array = array
-    end
-
-    def get_wait_update_point : Hash(Point)
-      result = Hash(Point)
-      @processing_cost += 1
-
-      @array.each_index do |i|
-        @array[i].each_index do |j|
-          cell = @array[i][j]
-          if cell.cost == @processing_cost
-            result << Point.new(i, j)
-          end
-        end
+        add_cost_around_cells point, @array
+        show
       end
 
-      return result
+      # @array = array
     end
+
+    # def get_wait_update_point : Hash(Point)
+    #   result = Hash(Point)
+    #   @processing_cost += 1
+
+    #   @array.each_index do |i|
+    #     @array[i].each_index do |j|
+    #       cell = @array[i][j]
+    #       if cell.cost == @processing_cost
+    #         result << Point.new(i, j)
+    #       end
+    #     end
+    #   end
+
+    #   return result
+    # end
 
     def add_cost_around_cells(origin : Point, array = @array)
       add_cost origin.upper, origin, array
@@ -103,9 +97,11 @@ module ForestFire
         abort
       end
 
+      pp target_cell
       if target_cell
-        if target_cell.cost == 0 || target_cell.cost < origin_cell.cost
-          target_cell.add
+        if target_cell.step == 0 || !target_cell.updated
+          target_cell.updated = true
+          target_cell.step += origin_cell.step + 1
           @queue << target
         end
       end
@@ -114,12 +110,14 @@ module ForestFire
     def get(point : Point, array = @array) : Cell?
       x = point.x
       y = point.y
+      x_max = array[0].size
+      y_max = array.size
 
-      if x < 0
+      if x < 0 || x_max <= x
         return nil
       end
 
-      if y < 0
+      if y < 0 || y_max <= y
         return nil
       end
 
@@ -140,7 +138,7 @@ module ForestFire
       `clear`
       @array.each do |a|
         a.each do |cell|
-          print "#{cell.cost.to_s}\t"
+          print "#{cell.step.to_s}\t"
         end
         print "\n"
       end
@@ -168,15 +166,11 @@ module ForestFire
     end
 
     def run
-      while true
-        @map.show
-        @map.add_cost_around_cells @start
-        @map.update
-        sleep(0.1)
+      @map.show
+      @map.update
 
-        if @one_frame
-          gets
-        end
+      if @one_frame
+        gets
       end
     end
   end
