@@ -1,8 +1,8 @@
-# TODO: Write documentation for `ForestFire`
+# TODO: Write documentation for `PathFinder`
 require "random"
 require "csv"
 
-module ForestFire
+module PathFinder
   VERSION = "0.1.0"
 
   class Cell
@@ -12,8 +12,12 @@ module ForestFire
     def initialize(@cost : Int32, @step = 0, @updated : Bool = false)
     end
 
-    def add
-      self.step += 1
+    def add(original : Cell)
+      self.step = (original.step + self.cost)
+    end
+
+    def add_except(original : Cell)
+      return (original.step + self.cost)
     end
 
     def_clone
@@ -81,12 +85,13 @@ module ForestFire
         abort
       end
 
-      pp target_cell
       if target_cell
-        if !target_cell.updated
+        pp "#{target_cell.add_except(origin_cell)}, #{target_cell.step}"
+
+        if !target_cell.updated || target_cell.add_except(origin_cell) < target_cell.step
           origin_cell.updated = true
           target_cell.updated = true
-          target_cell.step += origin_cell.step + 1
+          target_cell.add origin_cell
           @queue << target
         end
       end
@@ -123,7 +128,7 @@ module ForestFire
       `clear`
       @array.each_index do |x|
         @array[x].each_index do |y|
-          print "#{@array[x][y].step.to_s}\t#{x},#{y}\t"
+          print "[#{x},#{y}]\t#{@array[x][y].step.to_s}\t"
         end
         print "\n"
       end

@@ -1,6 +1,6 @@
 require "./path_finder.cr"
 
-module ForestFire
+module PathFinder
   start_x = ARGV[0].to_i
   start_y = ARGV[1].to_i
   goal_x = ARGV[2].to_i
