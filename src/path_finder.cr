@@ -44,7 +44,7 @@ module ForestFire
   end
 
   class Map
-    def initialize(@array : Array(Array(Cell)), @goal : Point, @start : Point, @processing_cost : Int32 = 0, @queue = Deque(Point).new)
+    def initialize(@array : Array(Array(Cell)), @start : Point, @goal : Point, @processing_cost : Int32 = 0, @queue = Deque(Point).new)
       @queue << @start
     end
 
@@ -66,22 +66,6 @@ module ForestFire
       # @array = array
     end
 
-    # def get_wait_update_point : Hash(Point)
-    #   result = Hash(Point)
-    #   @processing_cost += 1
-
-    #   @array.each_index do |i|
-    #     @array[i].each_index do |j|
-    #       cell = @array[i][j]
-    #       if cell.cost == @processing_cost
-    #         result << Point.new(i, j)
-    #       end
-    #     end
-    #   end
-
-    #   return result
-    # end
-
     def add_cost_around_cells(origin : Point, array = @array)
       add_cost origin.upper, origin, array
       add_cost origin.bottom, origin, array
@@ -99,7 +83,8 @@ module ForestFire
 
       pp target_cell
       if target_cell
-        if target_cell.step == 0 || !target_cell.updated
+        if !target_cell.updated
+          origin_cell.updated = true
           target_cell.updated = true
           target_cell.step += origin_cell.step + 1
           @queue << target
@@ -136,9 +121,9 @@ module ForestFire
 
     def show
       `clear`
-      @array.each do |a|
-        a.each do |cell|
-          print "#{cell.step.to_s}\t"
+      @array.each_index do |x|
+        @array[x].each_index do |y|
+          print "#{@array[x][y].step.to_s}\t#{x},#{y}\t"
         end
         print "\n"
       end
