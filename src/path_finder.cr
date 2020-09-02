@@ -7,17 +7,17 @@ module PathFinder
   VERSION = "0.1.0"
 
   class Cell
-    getter cost, step, updated, on_route
-    setter cost, step, updated, on_route
+    getter cost, step, updated, on_route, confirmed
+    setter cost, step, updated, on_route, confirmed
 
-    def initialize(@cost : Int32, @step = 0, @updated = false, @on_route = false)
+    def initialize(@cost : Int32, @step = Int32::MAX, @updated = false, @on_route = false, @confirmed = false)
     end
 
-    def add(original : Cell)
+    def set_cost(original : Cell)
       self.step = (original.step + self.cost)
     end
 
-    def add_except(original : Cell)
+    def cost_except(original : Cell)
       return (original.step + self.cost)
     end
 
@@ -56,26 +56,29 @@ module PathFinder
       @start : Point,
       @goal : Point,
       @processing_cost : Int32 = 0,
-      @queue = Deque(Point).new,
+      @update_list = Array(Point).new,
       @route = Deque(Point).new
     )
-      @queue << @start
+      @array[@start.x][@start.y].step = 0
+      @update_list << @start
       @route << @goal
     end
 
     def update
       array = @array.clone
 
-      point = 1
-      while @queue.size != 0
-        pp @queue
-        point = @queue.shift?
-        if point.nil?
+      while @update_list.size != 0
+        if @array[@goal.x][@goal.y].confirmed
           break
         end
 
+        @update_list.sort! { |a, b| get(a).not_nil!.step <=> get(b).not_nil!.step }
+        # gets
+        # pp @update_list.map {|a| get(a).not_nil!.step}
+        point = @update_list.shift
+
+        @array[point.x][point.y].confirmed = true
         add_costs_around_cell point, @array
-        show
       end
 
       # @array = array
@@ -105,14 +108,15 @@ module PathFinder
       end
 
       if target_cell
-        pp "#{target_cell.add_except(origin_cell)}, #{target_cell.step}"
-
-        if !target_cell.updated || target_cell.add_except(origin_cell) < target_cell.step
-          origin_cell.updated = true
-          target_cell.updated = true
-          target_cell.add origin_cell
-          @queue << target
+        if target_cell.confirmed
+          return
         end
+
+        if target_cell.cost_except(origin_cell) < target_cell.step
+          min_cell = get(get_min_step_cell_around_cell target).not_nil!
+          target_cell.set_cost min_cell # ここで，直接繋がっている周辺のノードで，最小のコストを設定する必要がある．
+        end
+        @update_list << target
       end
     end
 
@@ -147,11 +151,19 @@ module PathFinder
       `clear`
       @array.each_index do |x|
         @array[x].each_index do |y|
-          step = @array[x][y].step.to_s
+          step = @array[x][y].step.to_s.colorize
+
           if @array[x][y].on_route
-            step = step.colorize(:yellow).bold
+            step = step.yellow.bold
           end
-          print "[#{x},#{y}]\t#{step}\t"
+          if @array[x][y].cost > 1
+            step = step.back(:red)
+          end
+          if @array[x][y].updated
+            step = step.blue
+          end
+
+          print "#{step}\t"
         end
         print "\n"
       end
@@ -163,7 +175,6 @@ module PathFinder
 
       while now != @start
         now = get_min_step_cell_around_cell now
-        pp now
         @route << now
       end
     end
@@ -195,7 +206,6 @@ module PathFinder
     end
 
     def run
-      @map.show
       @map.update
       @map.make_route
       @map.color_route
