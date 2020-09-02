@@ -5,8 +5,8 @@ authors:
   - takanotume24 <takanotume24@gmail.com>
 
 targets:
-  path_finder:
-    main: src/path_finder.cr
+  main:
+    main: src/main.cr
 
 crystal: 0.35.1
 

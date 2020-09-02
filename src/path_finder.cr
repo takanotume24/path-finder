@@ -7,10 +7,10 @@ module PathFinder
   VERSION = "0.1.0"
 
   class Cell
-    getter cost, step, updated
-    setter cost, step, updated
+    getter cost, step, updated, on_route
+    setter cost, step, updated, on_route
 
-    def initialize(@cost : Int32, @step = 0, @updated : Bool = false)
+    def initialize(@cost : Int32, @step = 0, @updated = false, @on_route = false)
     end
 
     def add(original : Cell)
@@ -21,16 +21,14 @@ module PathFinder
       return (original.step + self.cost)
     end
 
-    def to_color
-      return "⬜".colorize(Colorize::Color256.new(self.step.to_u8))
-    end
-
     def_clone
   end
 
   class Point
     getter x : Int32
     getter y : Int32
+
+    def_equals @x, @y
 
     def initialize(@x : Int32, @y : Int32)
     end
@@ -90,10 +88,12 @@ module PathFinder
       add_cost origin.right, origin, array
     end
 
-    def get_min_step_cell_around_cell(origin : Point)
-      [get(origin.upper), get(origin.bottom), get(origin.right), get(origin.left)].min_by do |cell|
-        cell.step
+    def get_min_step_cell_around_cell(origin : Point) : Point
+      min = {origin.upper => get(origin.upper), origin.bottom => get(origin.bottom), origin.right => get(origin.right), origin.left => get(origin.left)}.compact.min_by do |k, v|
+        v.step
       end
+
+      return min[0]
     end
 
     def add_cost(target : Point, origin : Point, array = @array)
@@ -147,18 +147,31 @@ module PathFinder
       `clear`
       @array.each_index do |x|
         @array[x].each_index do |y|
-          print "[#{x},#{y}]\t#{@array[x][y].step.to_s}\t"
+          step = @array[x][y].step.to_s
+          if @array[x][y].on_route
+            step = step.colorize(:yellow).bold
+          end
+          print "[#{x},#{y}]\t#{step}\t"
         end
         print "\n"
       end
       puts ""
     end
 
-    def show_route
-      while @route.size != 0
-        now = @route.pop
-        now.
-        @route << get_min_step_cell_around_cell array[@goal.x][@goal.y]
+    def make_route
+      now = @goal
+
+      while now != @start
+        now = get_min_step_cell_around_cell now
+        pp now
+        @route << now
+        @array[now.x][now.y].on_route = true
+      end
+    end
+
+    def color_route
+      @route.each do |point|
+        @array[point.x][point.y].on_route = true
       end
     end
   end
@@ -185,6 +198,9 @@ module PathFinder
     def run
       @map.show
       @map.update
+      @map.make_route
+      @map.color_route
+      @map.show
 
       if @one_frame
         gets
