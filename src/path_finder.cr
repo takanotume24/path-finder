@@ -165,7 +165,6 @@ module PathFinder
         now = get_min_step_cell_around_cell now
         pp now
         @route << now
-        @array[now.x][now.y].on_route = true
       end
     end
 
